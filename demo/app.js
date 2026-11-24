@@ -20,6 +20,15 @@
     'what how when who which do does did will would should may there their they we you your about any if not ' +
     'all also has have had was were been than then into per under up out').split(' '));
 
+  // Words students use vs. words the documents use.
+  var SYNONYMS = {
+    hostel: ['residence', 'resident'], hostels: ['residence'], dorm: ['residence'],
+    curfew: ['closed', 'pm'], intime: ['closed', 'pm', 'timing'], timing: ['closed', 'pm'],
+    guest: ['visitor'], visitor: ['guest'], cgpa: ['sgpa', 'grade', 'point'],
+    exam: ['examination'], miss: ['absent', 'absence'], leave: ['absence'],
+  };
+  var MIN_COVERAGE = 0.6;
+
   var chunks = [], docTokens = [], df = new Map(), avgLen = 0;
 
   function tokenize(text) {
@@ -39,20 +48,40 @@
     avgLen = total / Math.max(1, chunks.length);
   }
 
+  function idf(t) {
+    var N = chunks.length, n = df.get(t) || 0;
+    return Math.log(1 + (N - n + 0.5) / (n + 0.5));
+  }
+
+  // Each query term becomes a group: the word itself plus its synonyms.
+  function queryGroups(query) {
+    var q = query.toLowerCase().replace(/in[\s-]time/g, 'intime');
+    return Array.from(new Set(tokenize(q))).map(function (t) {
+      return [t].concat(tokenize((SYNONYMS[t] || []).join(' ')));
+    });
+  }
+
   function search(query) {
-    var q = Array.from(new Set(tokenize(query)));
-    var N = chunks.length, k1 = 1.5, b = 0.75;
+    var groups = queryGroups(query);
+    var k1 = 1.5, b = 0.75;
     var scored = docTokens.map(function (toks, i) {
       var tf = new Map();
       toks.forEach(function (t) { tf.set(t, (tf.get(t) || 0) + 1); });
-      var score = 0;
-      q.forEach(function (t) {
-        var f = tf.get(t);
-        if (!f) return;
-        var idf = Math.log(1 + (N - df.get(t) + 0.5) / (df.get(t) + 0.5));
-        score += idf * (f * (k1 + 1)) / (f + k1 * (1 - b + b * toks.length / avgLen));
+      var score = 0, covered = 0, possible = 0;
+      groups.forEach(function (group) {
+        var weight = idf(group[0]);
+        possible += weight;
+        var matched = false;
+        group.forEach(function (t, j) {
+          var f = tf.get(t);
+          if (!f) return;
+          matched = true;
+          var boost = j === 0 ? 1 : 0.8;
+          score += boost * idf(t) * (f * (k1 + 1)) / (f + k1 * (1 - b + b * toks.length / avgLen));
+        });
+        if (matched) covered += weight;
       });
-      return { i: i, score: score };
+      return { i: i, score: score, coverage: possible ? covered / possible : 0 };
     });
     return scored.filter(function (s) { return s.score > 0; })
       .sort(function (a, b) { return b.score - a.score; }).slice(0, TOP_K);
@@ -66,7 +95,7 @@
 
   function highlight(text, query) {
     var html = escapeHtml(text);
-    var terms = tokenize(query).filter(function (t) { return t.length > 2; });
+    var terms = [].concat.apply([], queryGroups(query)).filter(function (t) { return t.length > 2 && t !== 'intime'; });
     terms.forEach(function (t) {
       var re = new RegExp('\\b(' + t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\w*)', 'gi');
       html = html.replace(re, '<mark>$1</mark>');
@@ -86,7 +115,7 @@
   function answer(query) {
     addMessage('user', '<p>' + escapeHtml(query) + '</p>');
     var hits = search(query);
-    if (!hits.length || hits[0].score < MIN_SCORE) {
+    if (!hits.length || hits[0].score < MIN_SCORE || hits[0].coverage < MIN_COVERAGE) {
       addMessage('bot', '<p>I cannot find that information in the official documents.</p>');
       return;
     }
