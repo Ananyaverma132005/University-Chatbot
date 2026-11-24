@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>University AI Assistant</title>
+  <meta name="description" content="Ask questions about XIM University's academic rules and hostel policy, answered from the official documents.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <aside class="sidebar">
+    <h2>About this demo</h2>
+    <p>The full app is a <b>RAG pipeline</b>: Mistral embeddings + ChromaDB retrieve the 5 most relevant chunks, and Mistral Large writes an answer strictly from them.</p>
+    <p>This hosted version runs entirely in your browser, with no API key. It performs the <b>retrieval step</b> (BM25 over the same 1000-character chunks) and shows the passages the model would answer from.</p>
+    <p><a href="https://github.com/Ananyaverma132005/University-Chatbot">Run the full app</a> with your own Mistral key for generated answers.</p>
+    <h3>Documents indexed</h3>
+    <ul>
+      <li>UG Manual of Policies (2023-24)</li>
+      <li>Resident Student Guidelines (2025-26)</li>
+      <li>Mass Communication Manual of Policies</li>
+    </ul>
+  </aside>
+
+  <main>
+    <header>
+      <h1>🎓 University AI Assistant</h1>
+      <p class="caption">Retrieval demo · answers come from the official university documents</p>
+    </header>
+
+    <section id="messages" aria-live="polite"></section>
+
+    <div id="examples" class="examples"></div>
+
+    <form id="ask" class="ask" autocomplete="off">
+      <label for="q" class="sr-only">Your question</label>
+      <input id="q" type="text" placeholder="Ask about attendance, exams, hostel rules…" required>
+      <button type="submit" aria-label="Send">➤</button>
+    </form>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

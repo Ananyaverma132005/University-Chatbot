@@ -5,7 +5,8 @@
 **An AI assistant that answers student questions from official university policy documents, using Retrieval-Augmented Generation (RAG).**
 
 <!-- LIVE_DEMO_START -->
-<!-- The live demo link will go here after deployment. -->
+**[▶ Live retrieval demo](https://ananyaverma132005.github.io/University-Chatbot/)**: searches the same policy-document chunks in your browser
+and shows the passages the model answers from. Run the app locally with a Mistral key for generated answers.
 <!-- LIVE_DEMO_END -->
 
 ![Python](https://img.shields.io/badge/Python-3776AB?style=flat&logo=python&logoColor=white)
@@ -88,6 +89,12 @@ streamlit run app.py
 If you don't set the environment variable, enter your API key in the sidebar. On Windows, you can also double-click `run_app.bat`.
 
 A pre-built vector index (`vector_db_mistral/`) is included, so the app starts without re-embedding the documents.
+
+## Hosted retrieval demo
+
+`.github/workflows/pages.yml` publishes `demo/` to GitHub Pages on every push. `demo/build_static.py` chunks the
+cleaned documents with the same settings as `app.py` (1000 characters, 200 overlap), and `demo/app.js` ranks
+them with BM25 in the browser. That's the retrieval step of the RAG pipeline, with no API key needed.
 
 ## Deployment (Streamlit Community Cloud, free)
 
