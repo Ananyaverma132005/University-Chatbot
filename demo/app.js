@@ -1,8 +1,3 @@
-/*
- * Retrieval demo for the University Chatbot.
- * BM25 search over the same document chunks the RAG app indexes; shows the
- * top passages instead of a generated answer (which needs a Mistral key).
- */
 (function () {
   'use strict';
 
