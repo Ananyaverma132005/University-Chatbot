@@ -20,7 +20,7 @@ st.caption("Powered by Mistral AI • Capstone Project")
 # --- SIDEBAR: API KEY ---
 with st.sidebar:
     st.header("Settings")
-    api_key = st.text_input("Enter Mistral API Key:", type="password")
+    api_key = os.environ.get("MISTRAL_API_KEY") or st.text_input("Enter Mistral API Key:", type="password")
     if not api_key:
         st.warning("Please enter your Mistral API key to start.")
         st.stop()
