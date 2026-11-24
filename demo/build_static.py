@@ -8,6 +8,7 @@ the cleaned policy documents are chunked with the same settings as app.py
 Usage:
     python demo/build_static.py
 """
+import hashlib
 import json
 import os
 import shutil
@@ -22,6 +23,11 @@ TITLES = {
     '345_Resident_Student_Policy_2025_26_NC.txt': 'Resident Student Guidelines (2025-26)',
     'MOP1.txt': 'Mass Communication Manual of Policies',
 }
+
+
+def file_hash(name):
+    with open(os.path.join(OUT, name), 'rb') as f:
+        return hashlib.sha1(f.read()).hexdigest()[:10]
 
 
 def split_text(text):
@@ -62,8 +68,23 @@ def main():
 
     with open(os.path.join(OUT, 'chunks.json'), 'w', encoding='utf-8') as f:
         json.dump(chunks, f, ensure_ascii=False, separators=(',', ':'))
-    for name in ('index.html', 'app.js', 'style.css'):
+    for name in ('app.js', 'style.css'):
         shutil.copy(os.path.join(ROOT, 'demo', name), os.path.join(OUT, name))
+
+    # Version asset URLs by content so browsers pick up new builds immediately.
+    js_path = os.path.join(OUT, 'app.js')
+    with open(js_path, encoding='utf-8') as f:
+        js = f.read()
+    js = js.replace("fetch('chunks.json')", f"fetch('chunks.json?v={file_hash('chunks.json')}')")
+    with open(js_path, 'w', encoding='utf-8') as f:
+        f.write(js)
+
+    with open(os.path.join(ROOT, 'demo', 'index.html'), encoding='utf-8') as f:
+        html = f.read()
+    for name in ('app.js', 'style.css'):
+        html = html.replace(f'"{name}"', f'"{name}?v={file_hash(name)}"')
+    with open(os.path.join(OUT, 'index.html'), 'w', encoding='utf-8') as f:
+        f.write(html)
     print(f'Built static demo with {len(chunks)} chunks in {OUT}')
 
 
