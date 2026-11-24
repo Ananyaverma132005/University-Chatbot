@@ -4,6 +4,10 @@
 
 **An AI assistant that answers student questions from official university policy documents, using Retrieval-Augmented Generation (RAG).**
 
+<!-- LIVE_DEMO_START -->
+<!-- The live demo link will go here after deployment. -->
+<!-- LIVE_DEMO_END -->
+
 ![Python](https://img.shields.io/badge/Python-3776AB?style=flat&logo=python&logoColor=white)
 ![LangChain](https://img.shields.io/badge/LangChain-1C3C3C?style=flat&logo=langchain&logoColor=white)
 ![Mistral AI](https://img.shields.io/badge/Mistral_AI-FA520F?style=flat&logo=mistralai&logoColor=white)
@@ -84,6 +88,15 @@ streamlit run app.py
 If you don't set the environment variable, enter your API key in the sidebar. On Windows, you can also double-click `run_app.bat`.
 
 A pre-built vector index (`vector_db_mistral/`) is included, so the app starts without re-embedding the documents.
+
+## Deployment (Streamlit Community Cloud, free)
+
+1. Sign in at [share.streamlit.io](https://share.streamlit.io) with GitHub → **Create app** → choose this repo, branch `main`, file `app.py`.
+2. Under **Advanced settings → Secrets**, add:
+   ```toml
+   MISTRAL_API_KEY = "your_key_here"
+   ```
+3. Click **Deploy**. The app reads the key automatically, so visitors can chat without entering one.
 
 ## Example questions
 
